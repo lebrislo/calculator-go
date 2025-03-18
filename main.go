@@ -7,6 +7,7 @@ import (
 
 	"calculator-go/handlers"
 	"calculator-go/middleware"
+	"calculator-go/utils"
 
 	"github.com/sirupsen/logrus"
 )
@@ -22,13 +23,19 @@ func main() {
 		PadLevelText: false,
 	})
 
-	logger.Info("Server is starting on port 8080...")
+	// Create a new ServeMux
+	mux := http.NewServeMux()
 
 	// Register routes with logging middleware
-	http.Handle("/add", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Add)))
-	http.Handle("/sub", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Sub)))
-	http.Handle("/mul", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Mul)))
-	http.Handle("/div", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Div)))
+	mux.Handle("/add", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Add)))
+	mux.Handle("/sub", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Sub)))
+	mux.Handle("/mul", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Mul)))
+	mux.Handle("/div", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Div)))
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// Apply rateLimiter middleware globally
+	rateLimitedMux := utils.RateLimiter(mux)
+
+	log.Fatal(http.ListenAndServe(":8080", rateLimitedMux))
+
+	logger.Info("Server is starting on port 8080...")
 }
