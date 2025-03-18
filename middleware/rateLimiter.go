@@ -1,6 +1,7 @@
-package utils
+package middleware
 
 import (
+	"calculator-go/utils"
 	"net/http"
 
 	"golang.org/x/time/rate"
@@ -11,7 +12,7 @@ var limiter = rate.NewLimiter(1, 3)
 func RateLimiter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		if !limiter.Allow() {
-			HandleError(res, req, http.StatusTooManyRequests, http.StatusText(http.StatusTooManyRequests))
+			utils.HandleError(res, req, http.StatusTooManyRequests, http.StatusText(http.StatusTooManyRequests))
 			return
 		}
 

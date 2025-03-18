@@ -7,7 +7,6 @@ import (
 
 	"calculator-go/handlers"
 	"calculator-go/middleware"
-	"calculator-go/utils"
 
 	"github.com/sirupsen/logrus"
 )
@@ -32,8 +31,10 @@ func main() {
 	mux.Handle("/mul", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Mul)))
 	mux.Handle("/div", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Div)))
 
+	// Apply auth middleware globally
+	authMux := middleware.Auth(mux)
 	// Apply rateLimiter middleware globally
-	rateLimitedMux := utils.RateLimiter(mux)
+	rateLimitedMux := middleware.RateLimiter(authMux)
 
 	log.Fatal(http.ListenAndServe(":8080", rateLimitedMux))
 
