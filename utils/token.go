@@ -20,7 +20,7 @@ func GenerateToken(userId int) (string, error) {
 
 func VerifyToken(tokenString string) (jwt.MapClaims, error) {
 	// Parse the token
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		// Check the signing method
 		if token.Method != jwt.SigningMethodHS256 {
 			return nil, fmt.Errorf("invalid signing method")

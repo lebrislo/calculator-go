@@ -23,6 +23,21 @@ func SendResult(res http.ResponseWriter, value int) {
 
 // HandleError handles error responses
 func HandleError(res http.ResponseWriter, req *http.Request, status int, message string) {
+	res.WriteHeader(status)
 	http.Error(res, message, status)
-	LogResponse(req, status, message, 0)
+	LogResponse(req, status, message, "")
+}
+
+func JsonResponse(res http.ResponseWriter, req *http.Request, status int, result string) {
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(status)
+	LogResponse(req, status, "", result)
+	fmt.Fprintln(res, result)
+}
+
+func TextResponse(res http.ResponseWriter, req *http.Request, status int, message string) {
+	res.Header().Set("Content-Type", "text/plain")
+	res.WriteHeader(status)
+	fmt.Fprintln(res, message)
+	LogResponse(req, status, message, "")
 }

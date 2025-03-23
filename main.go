@@ -22,19 +22,32 @@ func main() {
 		PadLevelText: false,
 	})
 
-	// Create a new ServeMux
-	mux := http.NewServeMux()
+	// Create a new ServeMux for public routes
+	publicMux := http.NewServeMux()
+	publicMux.Handle("/login", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Login)))
+	publicMux.Handle("/register", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Register)))
 
-	// Register routes with logging middleware
-	mux.Handle("/add", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Add)))
-	mux.Handle("/sub", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Sub)))
-	mux.Handle("/mul", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Mul)))
-	mux.Handle("/div", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Div)))
+	// Create a new ServeMux for protected routes
+	protectedMux := http.NewServeMux()
+	protectedMux.Handle("/add", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Add)))
+	protectedMux.Handle("/sub", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Sub)))
+	protectedMux.Handle("/mul", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Mul)))
+	protectedMux.Handle("/div", middleware.LoggingMiddleware(http.HandlerFunc(handlers.Div)))
 
-	// Apply auth middleware globally
-	authMux := middleware.Auth(mux)
+	// Apply auth middleware to protected routes
+	authProtectedMux := middleware.Authentification(protectedMux)
+
+	// Combine public and protected routes into a single mux
+	mainMux := http.NewServeMux()
+	mainMux.Handle("/login", publicMux)
+	mainMux.Handle("/register", publicMux)
+	mainMux.Handle("/add", authProtectedMux)
+	mainMux.Handle("/sub", authProtectedMux)
+	mainMux.Handle("/mul", authProtectedMux)
+	mainMux.Handle("/div", authProtectedMux)
+
 	// Apply rateLimiter middleware globally
-	rateLimitedMux := middleware.RateLimiter(authMux)
+	rateLimitedMux := middleware.RateLimiter(mainMux)
 
 	log.Fatal(http.ListenAndServe(":8080", rateLimitedMux))
 

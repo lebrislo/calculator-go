@@ -21,7 +21,7 @@ func LogRequest(r *http.Request) {
 }
 
 // LogResponse logs response details
-func LogResponse(r *http.Request, status int, message string, result int) {
+func LogResponse(r *http.Request, status int, message string, result string) {
 	requestId := r.Header.Get("requestId")
 	entry := logger.WithFields(logrus.Fields{
 		"method":    r.Method,
@@ -30,10 +30,10 @@ func LogResponse(r *http.Request, status int, message string, result int) {
 		"host":      r.Host,
 		"requestId": requestId,
 		"status":    status,
+		"result":    result,
 	})
 
 	if status >= 200 && status < 300 {
-		entry = entry.WithField("result", result)
 		entry.Info(message)
 	} else {
 		entry.Error(message)

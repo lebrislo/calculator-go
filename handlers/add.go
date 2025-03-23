@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"calculator-go/utils"
+	"fmt"
 	"net/http"
 )
 
@@ -14,5 +15,5 @@ func Add(res http.ResponseWriter, req *http.Request) {
 
 	value := a + b
 	utils.SendResult(res, value)
-	utils.LogResponse(req, http.StatusOK, "Addition performed", value)
+	utils.LogResponse(req, http.StatusOK, "Addition performed", fmt.Sprint(value))
 }
